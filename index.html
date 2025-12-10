@@ -183,13 +183,7 @@
         <h1>✨ Melhorador de Textos Profissional</h1>
         <p class="subtitle">Transforme seus textos com IA avançada</p>
         
-        <div class="features">
-            <span class="feature-badge">📝 Clareza</span>
-            <span class="feature-badge">🎯 Organização</span>
-            <span class="feature-badge">⚡ Concisão</span>
-            <span class="feature-badge">💼 Profissionalismo</span>
-            <span class="feature-badge">🎖️ Foco no Resultado</span>
-        </div>
+
 
         <div class="text-areas">
             <div class="text-container">
@@ -241,7 +235,7 @@
                     },
                     body: JSON.stringify({
                         model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
+                        max_tokens: 2000,
                         messages: [{
                             role: 'user',
                             content: `Você é um especialista em comunicação profissional. Melhore o texto a seguir para ter:
@@ -265,21 +259,32 @@ ${inputText}`
                     })
                 });
 
+                const data = await response.json();
+                
                 if (!response.ok) {
-                    throw new Error('Erro ao processar o texto');
+                    console.error('Erro da API:', data);
+                    throw new Error(data.error?.message || 'Erro ao processar o texto');
                 }
 
-                const data = await response.json();
-                const improvedText = data.content
-                    .map(item => item.type === 'text' ? item.text : '')
-                    .join('\n')
-                    .trim();
+                if (data.content && data.content.length > 0) {
+                    const improvedText = data.content
+                        .map(item => item.type === 'text' ? item.text : '')
+                        .filter(text => text.length > 0)
+                        .join('\n')
+                        .trim();
 
-                outputText.value = improvedText;
+                    if (improvedText) {
+                        outputText.value = improvedText;
+                    } else {
+                        throw new Error('Resposta vazia da API');
+                    }
+                } else {
+                    throw new Error('Formato de resposta inválido');
+                }
 
             } catch (err) {
-                error.textContent = '❌ Erro ao melhorar o texto. Tente novamente.';
-                console.error('Erro:', err);
+                error.textContent = `❌ Erro: ${err.message}. Verifique o console para mais detalhes.`;
+                console.error('Erro completo:', err);
             } finally {
                 btn.disabled = false;
                 loading.classList.remove('active');
