@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melhorador de Textos Profissional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .feature-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .text-areas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .text-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .text-container label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #outputText {
+            background: #f8f9fa;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .text-areas {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Melhorador de Textos Profissional</h1>
+        <p class="subtitle">Transforme seus textos com IA avançada</p>
+        
+        <div class="features">
+            <span class="feature-badge">📝 Clareza</span>
+            <span class="feature-badge">🎯 Organização</span>
+            <span class="feature-badge">⚡ Concisão</span>
+            <span class="feature-badge">💼 Profissionalismo</span>
+            <span class="feature-badge">🎖️ Foco no Resultado</span>
+        </div>
+
+        <div class="text-areas">
+            <div class="text-container">
+                <label for="inputText">Texto Original:</label>
+                <textarea id="inputText" placeholder="Cole ou digite seu texto aqui..."></textarea>
+            </div>
+            <div class="text-container">
+                <label for="outputText">Texto Melhorado:</label>
+                <textarea id="outputText" readonly placeholder="O texto melhorado aparecerá aqui..."></textarea>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button id="improveBtn" onclick="improveText()">🚀 Melhorar Texto</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Melhorando seu texto...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        async function improveText() {
+            const inputText = document.getElementById('inputText').value.trim();
+            const outputText = document.getElementById('outputText');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const btn = document.getElementById('improveBtn');
+
+            error.textContent = '';
+
+            if (!inputText) {
+                error.textContent = '⚠️ Por favor, insira um texto para melhorar.';
+                return;
+            }
+
+            btn.disabled = true;
+            loading.classList.add('active');
+            outputText.value = '';
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{
+                            role: 'user',
+                            content: `Você é um especialista em comunicação profissional. Melhore o texto a seguir para ter:
+
+✓ CLAREZA: Linguagem simples e direta
+✓ ORGANIZAÇÃO: Estrutura lógica e coerente
+✓ CONCISÃO: Elimine redundâncias, seja objetivo
+✓ PROFISSIONALISMO: Tom adequado ao contexto corporativo
+✓ FOCO NO RESULTADO: Destaque valor e impacto
+
+REGRAS IMPORTANTES:
+- Mantenha o significado original
+- Use linguagem profissional mas acessível
+- Organize em parágrafos quando apropriado
+- Seja direto e objetivo
+- Retorne APENAS o texto melhorado, sem explicações adicionais
+
+TEXTO ORIGINAL:
+${inputText}`
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro ao processar o texto');
+                }
+
+                const data = await response.json();
+                const improvedText = data.content
+                    .map(item => item.type === 'text' ? item.text : '')
+                    .join('\n')
+                    .trim();
+
+                outputText.value = improvedText;
+
+            } catch (err) {
+                error.textContent = '❌ Erro ao melhorar o texto. Tente novamente.';
+                console.error('Erro:', err);
+            } finally {
+                btn.disabled = false;
+                loading.classList.remove('active');
+            }
+        }
+
+        document.getElementById('inputText').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                improveText();
+            }
+        });
+    </script>
+</body>
+</html>
