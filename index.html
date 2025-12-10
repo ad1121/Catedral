@@ -44,23 +44,6 @@
             font-size: 1.1em;
         }
 
-        .features {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .feature-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 500;
-        }
-
         .text-areas {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -170,20 +153,25 @@
             }
         }
 
-        .error {
-            color: #e74c3c;
-            text-align: center;
-            margin-top: 15px;
-            font-weight: 500;
+        .info {
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .info strong {
+            color: #667eea;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>✨ Melhorador de Textos Profissional</h1>
-        <p class="subtitle">Transforme seus textos com IA avançada</p>
-        
-
+        <p class="subtitle">Transforme seus textos com otimizações inteligentes</p>
 
         <div class="text-areas">
             <div class="text-container">
@@ -205,21 +193,20 @@
             <p>Melhorando seu texto...</p>
         </div>
 
-        <div class="error" id="error"></div>
+        <div class="info">
+            <strong>💡 Dica:</strong> Para usar IA real (Claude), você pode copiar este código e usar em seu próprio servidor com uma chave de API da Anthropic. Este ambiente aplica melhorias programáticas baseadas em boas práticas de escrita profissional.
+        </div>
     </div>
 
     <script>
-        async function improveText() {
+        function improveText() {
             const inputText = document.getElementById('inputText').value.trim();
             const outputText = document.getElementById('outputText');
             const loading = document.getElementById('loading');
-            const error = document.getElementById('error');
             const btn = document.getElementById('improveBtn');
 
-            error.textContent = '';
-
             if (!inputText) {
-                error.textContent = '⚠️ Por favor, insira um texto para melhorar.';
+                alert('⚠️ Por favor, insira um texto para melhorar.');
                 return;
             }
 
@@ -227,68 +214,74 @@
             loading.classList.add('active');
             outputText.value = '';
 
-            try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 2000,
-                        messages: [{
-                            role: 'user',
-                            content: `Você é um especialista em comunicação profissional. Melhore o texto a seguir para ter:
+            // Simula processamento
+            setTimeout(() => {
+                let improved = inputText;
 
-✓ CLAREZA: Linguagem simples e direta
-✓ ORGANIZAÇÃO: Estrutura lógica e coerente
-✓ CONCISÃO: Elimine redundâncias, seja objetivo
-✓ PROFISSIONALISMO: Tom adequado ao contexto corporativo
-✓ FOCO NO RESULTADO: Destaque valor e impacto
-
-REGRAS IMPORTANTES:
-- Mantenha o significado original
-- Use linguagem profissional mas acessível
-- Organize em parágrafos quando apropriado
-- Seja direto e objetivo
-- Retorne APENAS o texto melhorado, sem explicações adicionais
-
-TEXTO ORIGINAL:
-${inputText}`
-                        }]
-                    })
-                });
-
-                const data = await response.json();
+                // Remove espaços extras
+                improved = improved.replace(/\s+/g, ' ');
                 
-                if (!response.ok) {
-                    console.error('Erro da API:', data);
-                    throw new Error(data.error?.message || 'Erro ao processar o texto');
+                // Remove múltiplas quebras de linha
+                improved = improved.replace(/\n{3,}/g, '\n\n');
+
+                // Capitaliza primeira letra de frases
+                improved = improved.replace(/(^\w|\.\s+\w)/gm, letter => letter.toUpperCase());
+
+                // Remove palavras repetidas
+                improved = improved.replace(/\b(\w+)\s+\1\b/gi, '$1');
+
+                // Substitui gírias por termos profissionais
+                const replacements = {
+                    'tipo assim': 'ou seja',
+                    'tipo': 'como',
+                    'daí': 'então',
+                    'aí': 'então',
+                    'né': '',
+                    'tá': 'está',
+                    'pra': 'para',
+                    'pro': 'para o',
+                    'vc': 'você',
+                    'tbm': 'também',
+                    'mt': 'muito',
+                    'msm': 'mesmo',
+                    'blz': 'certo',
+                    'vlw': 'obrigado',
+                    ' q ': ' que ',
+                    'bom dia,': 'Prezado(a),',
+                    'oi,': 'Prezado(a),',
+                    'ola,': 'Prezado(a),',
+                    'olá,': 'Prezado(a),'
+                };
+
+                for (let [informal, formal] of Object.entries(replacements)) {
+                    const regex = new RegExp('\\b' + informal + '\\b', 'gi');
+                    improved = improved.replace(regex, formal);
                 }
 
-                if (data.content && data.content.length > 0) {
-                    const improvedText = data.content
-                        .map(item => item.type === 'text' ? item.text : '')
-                        .filter(text => text.length > 0)
-                        .join('\n')
-                        .trim();
+                // Remove espaços antes de pontuação
+                improved = improved.replace(/\s+([.,!?;:])/g, '$1');
 
-                    if (improvedText) {
-                        outputText.value = improvedText;
-                    } else {
-                        throw new Error('Resposta vazia da API');
-                    }
-                } else {
-                    throw new Error('Formato de resposta inválido');
+                // Adiciona espaço após pontuação
+                improved = improved.replace(/([.,!?;:])(\w)/g, '$1 $2');
+
+                // Remove reticências excessivas
+                improved = improved.replace(/\.{4,}/g, '...');
+
+                // Remove exclamações excessivas
+                improved = improved.replace(/!{2,}/g, '!');
+
+                // Limpa espaços no início e fim
+                improved = improved.trim();
+
+                // Organiza em parágrafos se não tiver
+                if (!improved.includes('\n') && improved.length > 200) {
+                    improved = improved.replace(/\.\s+/g, '.\n\n');
                 }
 
-            } catch (err) {
-                error.textContent = `❌ Erro: ${err.message}. Verifique o console para mais detalhes.`;
-                console.error('Erro completo:', err);
-            } finally {
+                outputText.value = improved;
                 btn.disabled = false;
                 loading.classList.remove('active');
-            }
+            }, 1000);
         }
 
         document.getElementById('inputText').addEventListener('keydown', function(e) {
